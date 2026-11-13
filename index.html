@@ -183,7 +183,6 @@
   }
   .btns{display:flex;gap:8px}
   
-  /* Botões com Ícones */
   .btn{
     font-family:inherit;font-size:12.5px;font-weight:600;
     padding:9px 14px;border-radius:9px;cursor:pointer;
@@ -286,7 +285,6 @@
     width:100%;height:100%;object-fit:cover;display:block;
   }
   .modal-media.grad{background-size:cover}
-  /* Gradiente sobre o vídeo para destacar o texto por baixo */
   .modal-media::after {
     content:'';position:absolute;inset:0;
     background:linear-gradient(to top, var(--surface) 0%, transparent 40%);
@@ -904,7 +902,7 @@
       </button>
       <button class="pay-opt" data-method="Gift Card">
         <div class="logo-box"><img src="giftcard.jpg" alt="Gift card" onerror="this.remove()"><span class="fb">G</span></div>
-        <div class="pay-opt-txt"><b>Gift Card</b><span>Amazon · Steam · Apple</span></div>
+        <div class="pay-opt-txt"><b>Gift Card</b><span>BINANCE • USDT </span></div>
         <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
       </button>
       <button class="pay-opt" data-method="PayPal">
@@ -961,7 +959,10 @@
             <h3>Products</h3>
             <p>Everything you add here saves to the cloud immediately.</p>
           </div>
-          <button class="btn primary" onclick="openProductForm()">+ New product</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn ghost" onclick="clearAllProducts()" style="color:#E5484D; border-color:rgba(229,72,77,.3);">Clear All</button>
+            <button class="btn primary" onclick="openProductForm()">+ New product</button>
+          </div>
         </div>
         <div class="alist" id="adminProductList"></div>
       </div>
@@ -1584,20 +1585,16 @@ function openPreview(id){
   media.innerHTML = '';
   media.style.backgroundImage = '';
 
-  // Se for vídeo, cria um elemento de vídeo com autoplay
   if (p.videoUrl){
     const v = document.createElement('video');
     v.src = p.videoUrl;
     v.autoplay = true;
-    v.muted = true;     // Obrigatório para autoplay funcionar nos browsers
+    v.muted = true;
     v.loop = true;
     v.playsInline = true;
-    v.controls = false; // Sem controlos para ficar mais limpo
+    v.controls = false;
     media.appendChild(v);
-    
-    // Garantir que começa a dar (alguns browsers precisam deste "empurrão")
-    v.play().catch(e => console.log('Autoplay bloqueado:', e));
-    
+    v.play().catch(e => console.log('Autoplay blocked:', e));
   } else if ((p.mediaType === 'upload' || p.mediaType === 'url') && p.thumbUrl){
     const img = document.createElement('img');
     img.src = p.thumbUrl;
@@ -1621,7 +1618,6 @@ function openPreview(id){
 
 function closePreview(){
   modal.classList.remove('open');
-  // Pausa o vídeo e remove o src para libertar memória
   const v = $('modalMedia').querySelector('video');
   if (v) {
     v.pause();
@@ -1792,6 +1788,18 @@ async function deleteProduct(id){
   showToast('✓ Product deleted', 'ok');
 }
 
+async function clearAllProducts(){
+  if (!confirm('Apagar TODOS os produtos? Esta ação não pode ser desfeita.')) return;
+  VELVET_DATA.products = [];
+  const ok = await persist();
+  if (!ok) return;
+  renderAdminProductList();
+  renderProducts();
+  renderChips();
+  renderBanner();
+  showToast('✓ Todos os produtos foram apagados', 'ok');
+}
+
 /* ============================================================
    PRODUCT FORM
    ============================================================ */
@@ -1878,7 +1886,7 @@ $('gradPick').addEventListener('click', e => {
 $('thumbFile').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   try {
-    const dataUrl = await compressImage(file, 900, 0.82);
+    const dataUrl = await compressImage(file, 300, 0.4);
     formState.thumbData = dataUrl;
     $('thumbPreview').src = dataUrl;
     $('thumbPreview').style.display = 'block';
@@ -2015,7 +2023,7 @@ $('bannerTypeSeg').addEventListener('click', e => {
 $('bImageFile').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   try {
-    const dataUrl = await compressImage(file, 1200, 0.82);
+    const dataUrl = await compressImage(file, 600, 0.4);
     bannerState.imageData = dataUrl;
   } catch { alert('Could not read image.'); }
 });
